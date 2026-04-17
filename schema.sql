@@ -70,13 +70,3 @@ CREATE TABLE IF NOT EXISTS admin_logs (
     action VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Migration examples for old databases. Run only the missing ALTER statements manually.
--- ALTER TABLE users ADD COLUMN role ENUM('user','admin') NOT NULL DEFAULT 'user';
--- ALTER TABLE donors ADD COLUMN last_donation_date DATE;
--- ALTER TABLE donors ADD COLUMN is_available BOOLEAN NOT NULL DEFAULT TRUE;
--- ALTER TABLE blood_requests ADD COLUMN city VARCHAR(100);
--- ALTER TABLE blood_requests ADD COLUMN status ENUM('pending','approved','rejected','completed') NOT NULL DEFAULT 'pending';
--- ALTER TABLE blood_requests ADD COLUMN is_emergency BOOLEAN NOT NULL DEFAULT FALSE;
--- ALTER TABLE blood_requests ADD COLUMN approved_at TIMESTAMP NULL;
--- ALTER TABLE blood_requests ADD COLUMN completed_at TIMESTAMP NULL;

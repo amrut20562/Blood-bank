@@ -83,11 +83,6 @@ public class FireManager {
         }
 
         DatabaseHelper.executeTransaction(conn -> {
-            int available = BloodBankService.getAvailableCompatibleUnits(conn, bloodGroup);
-            if (available >= parsedQuantity) {
-                throw new SQLException("Enough compatible stock is available. Please contact admin for direct allocation.");
-            }
-
             String name = "";
             String mobile = "";
             String city = "";
