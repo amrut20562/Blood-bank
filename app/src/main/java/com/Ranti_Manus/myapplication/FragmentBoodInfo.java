@@ -1,6 +1,7 @@
 package com.Ranti_Manus.myapplication;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -30,6 +31,7 @@ public class FragmentBoodInfo extends Fragment {
 
     Button blood_request_btn;
     Button Donate_btn;
+    Button myRequestsBtn;
 
     public FragmentBoodInfo() {
         // Required empty public constructor
@@ -69,6 +71,7 @@ public class FragmentBoodInfo extends Fragment {
         View view =  inflater.inflate(R.layout.fragment_bood_info, container, false);
         blood_request_btn = view.findViewById(R.id.blood_request_btn);
         Donate_btn = view.findViewById(R.id.Donate_btn);
+        myRequestsBtn = view.findViewById(R.id.my_requests_btn);
         TextView A_plus ,A_minus,B_plus,B_minus,O_plus,O_minus,AB_plus,AB_minus;
 
         A_plus = view.findViewById(R.id.A_plus);
@@ -80,7 +83,8 @@ public class FragmentBoodInfo extends Fragment {
         AB_plus = view.findViewById(R.id.AB_plus);
         AB_minus = view.findViewById(R.id.AB_minus);
 
-        String query = "SELECT blood_group, quantity FROM blood_data";
+        String query = "SELECT blood_group, COALESCE(SUM(quantity),0) AS quantity FROM blood_inventory " +
+                "WHERE expiry_date >= CURDATE() AND quantity > 0 GROUP BY blood_group";
         DatabaseHelper.executeQuery(query, null, rs -> {
             Model_BloodData data = new Model_BloodData();
             while (rs.next()) {
@@ -118,13 +122,21 @@ public class FragmentBoodInfo extends Fragment {
                     O_minus.setText(modelBloodData.O_minus);
                     AB_plus.setText(modelBloodData.AB_plus);
                     AB_minus.setText(modelBloodData.AB_minus);
+                    applyStockColor(A_plus, modelBloodData.A_plus);
+                    applyStockColor(A_minus, modelBloodData.A_minus);
+                    applyStockColor(B_plus, modelBloodData.B_plus);
+                    applyStockColor(B_minus, modelBloodData.B_minus);
+                    applyStockColor(O_plus, modelBloodData.O_plus);
+                    applyStockColor(O_minus, modelBloodData.O_minus);
+                    applyStockColor(AB_plus, modelBloodData.AB_plus);
+                    applyStockColor(AB_minus, modelBloodData.AB_minus);
                 }
             }
 
             @Override
             public void onFailure(Exception e) {
                 if (!isAdded()) return;
-                Toast.makeText(requireContext(), "Failed to read data ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Failed to read data: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 
@@ -148,7 +160,18 @@ public class FragmentBoodInfo extends Fragment {
             }
         });
 
+        myRequestsBtn.setOnClickListener(v -> startActivity(new Intent(requireContext(), UserRequestsActivity.class)));
+
         return  view;
 
+    }
+
+    private void applyStockColor(TextView view, String quantity) {
+        int value = 0;
+        try {
+            value = Integer.parseInt(quantity);
+        } catch (Exception ignored) {
+        }
+        view.setTextColor(value < 10 ? Color.RED : Color.rgb(0, 140, 0));
     }
 }

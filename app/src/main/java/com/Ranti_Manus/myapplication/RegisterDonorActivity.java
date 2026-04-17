@@ -14,7 +14,7 @@ import android.widget.Toast;
 public class RegisterDonorActivity extends AppCompatActivity {
 
     String bloodGroup = "A+";
-    EditText name,mobile_num,city;
+    EditText name,mobile_num,city, donationQuantity;
     Button register_btn;
 
     @Override
@@ -28,6 +28,7 @@ public class RegisterDonorActivity extends AppCompatActivity {
         name = findViewById(R.id.name);
         mobile_num = findViewById(R.id.mobile_num);
         city = findViewById(R.id.city);
+        donationQuantity = findViewById(R.id.donation_quantity);
 
         register_btn = findViewById(R.id.register_btn);
 
@@ -50,9 +51,14 @@ public class RegisterDonorActivity extends AppCompatActivity {
                 String str_name = name.getText().toString().trim();
                 String str_mobile_num = mobile_num.getText().toString().trim();
                 String str_city = city.getText().toString().trim();
+                int parsedQuantity = ValidationUtils.parsePositiveQuantity(donationQuantity.getText().toString().trim());
 
                 if(str_name.isEmpty()|| str_mobile_num.isEmpty() || str_city.isEmpty()){
                     Toast.makeText(RegisterDonorActivity.this, "please fill all fields ", Toast.LENGTH_SHORT).show();
+                } else if (!ValidationUtils.isValidMobile(str_mobile_num)) {
+                    Toast.makeText(RegisterDonorActivity.this, "Enter a valid 10 digit mobile number", Toast.LENGTH_SHORT).show();
+                } else if (parsedQuantity <= 0) {
+                    Toast.makeText(RegisterDonorActivity.this, "Enter a valid donation quantity", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     android.content.SharedPreferences sharedPreferences = getSharedPreferences("BloodBankPrefs", android.content.Context.MODE_PRIVATE);
@@ -64,8 +70,8 @@ public class RegisterDonorActivity extends AppCompatActivity {
                     FireManager manager = new FireManager();
                     Model_Donor donor = new Model_Donor(uid, str_name,bloodGroup,str_city,str_mobile_num);
                     register_btn.setEnabled(false);
-                    Toast.makeText(RegisterDonorActivity.this, "Registering.....", Toast.LENGTH_SHORT).show();
-                    manager.setDonor(RegisterDonorActivity.this, donor, new FireManager.OperationCallback() {
+                    Toast.makeText(RegisterDonorActivity.this, "Recording donation.....", Toast.LENGTH_SHORT).show();
+                    manager.donateBlood(RegisterDonorActivity.this, donor, parsedQuantity, new FireManager.OperationCallback() {
                         @Override
                         public void onSuccess() {
                             finish();

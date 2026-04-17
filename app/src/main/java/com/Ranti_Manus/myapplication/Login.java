@@ -29,10 +29,12 @@ public class Login extends AppCompatActivity {
 
     private static class LoginResult {
         final String uid;
+        final String role;
         final boolean needsPasswordMigration;
 
-        LoginResult(String uid, boolean needsPasswordMigration) {
+        LoginResult(String uid, String role, boolean needsPasswordMigration) {
             this.uid = uid;
+            this.role = role;
             this.needsPasswordMigration = needsPasswordMigration;
         }
     }
@@ -43,8 +45,11 @@ public class Login extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         sharedPreferences = getSharedPreferences("BloodBankPrefs", Context.MODE_PRIVATE);
         String currentUser = sharedPreferences.getString("uid", null);
+        String role = sharedPreferences.getString("role", "user");
         if(currentUser != null){
-            Intent intent = new Intent(Login.this, MainActivity.class);
+            Intent intent = "admin".equals(role)
+                    ? new Intent(Login.this, AdminDashboardActivity.class)
+                    : new Intent(Login.this, MainActivity.class);
             startActivity(intent);
             finish();
         }
@@ -90,7 +95,7 @@ public class Login extends AppCompatActivity {
                     return;
                 }
 
-                String query = "SELECT uid, password FROM users WHERE email = ?";
+                String query = "SELECT uid, password, role FROM users WHERE email = ?";
                 
                 DatabaseHelper.executeQuery(query, new DatabaseHelper.PreparedStatementAction() {
                     @Override
@@ -102,12 +107,13 @@ public class Login extends AppCompatActivity {
                     public LoginResult process(ResultSet rs) throws SQLException {
                         if (rs.next()) {
                             String uid = rs.getString("uid");
+                            String role = rs.getString("role");
                             String storedPassword = rs.getString("password");
                             if (PasswordHasher.matches(password, storedPassword)) {
-                                return new LoginResult(uid, false);
+                                return new LoginResult(uid, role, false);
                             }
                             if (password.equals(storedPassword)) {
-                                return new LoginResult(uid, true);
+                                return new LoginResult(uid, role, true);
                             }
                         }
                         return null;
@@ -119,6 +125,7 @@ public class Login extends AppCompatActivity {
                         if (result != null) {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putString("uid", result.uid);
+                            editor.putString("role", result.role);
                             editor.apply();
 
                             if (result.needsPasswordMigration) {

@@ -131,7 +131,7 @@ public class Fragment_profile extends Fragment {
                 @Override
                 public void onFailure(Exception e) {
                     if (!isAdded()) return;
-                    Toast.makeText(requireContext(),"failed to read data ",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(),"failed to read data: " + e.getMessage(),Toast.LENGTH_LONG).show();
                 }
             });
         }

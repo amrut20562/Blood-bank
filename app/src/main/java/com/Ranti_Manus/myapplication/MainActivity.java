@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     Button search_btn,blood_info_btn,user_pr_btn;
     SharedPreferences sharedPreferences;
+    TextView totalUnitsText, pendingRequestsText, donorCountText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +49,12 @@ public class MainActivity extends AppCompatActivity {
         search_btn = findViewById(R.id.search_btn);
         blood_info_btn= findViewById(R.id.blood_info_btn);
         user_pr_btn = findViewById(R.id.user_pr_btn);
+        totalUnitsText = findViewById(R.id.total_units);
+        pendingRequestsText = findViewById(R.id.pending_requests);
+        donorCountText = findViewById(R.id.donor_count);
 
         LoadFragment(new Fragment_searchDoner(), true);
+        loadDashboardStats();
 
         search_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,6 +91,14 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (totalUnitsText != null) {
+            loadDashboardStats();
+        }
     }
 
 
@@ -126,6 +140,21 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    private void loadDashboardStats() {
+        BloodBankService.loadDashboardStats(new DatabaseHelper.DbCallback<BloodBankService.DashboardStats>() {
+            @Override
+            public void onSuccess(BloodBankService.DashboardStats stats) {
+                totalUnitsText.setText("Units: " + stats.totalUnits);
+                pendingRequestsText.setText("Pending: " + stats.pendingRequests);
+                donorCountText.setText("Donors: " + stats.donorCount);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+            }
+        });
     }
 
 

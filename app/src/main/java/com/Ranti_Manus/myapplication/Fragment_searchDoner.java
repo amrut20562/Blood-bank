@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -86,18 +87,24 @@ public class Fragment_searchDoner extends Fragment {
 
 
 
-        String query = "SELECT * FROM donors";
-        DatabaseHelper.executeQuery(query, null, rs -> {
+        android.content.SharedPreferences prefs = context.getSharedPreferences("BloodBankPrefs", Context.MODE_PRIVATE);
+        String uid = prefs.getString("uid", null);
+        String query = "SELECT d.uid, d.name, d.blood_group, d.city, d.mobile, (SELECT blood_group FROM users WHERE uid=?) AS user_blood_group FROM donors d WHERE d.is_available=TRUE";
+        DatabaseHelper.executeQuery(query, pstmt -> pstmt.setString(1, uid), rs -> {
             java.util.ArrayList<Model_Donor> list = new java.util.ArrayList<>();
             while (rs.next()) {
-                Model_Donor d = new Model_Donor(
-                    rs.getString("uid"),
-                    rs.getString("name"),
-                    rs.getString("blood_group"),
-                    rs.getString("city"),
-                    rs.getString("mobile")
-                );
-                list.add(d);
+                String userBloodGroup = rs.getString("user_blood_group");
+                String donorGroup = rs.getString("blood_group");
+                if (userBloodGroup == null || userBloodGroup.trim().isEmpty() || BloodCompatibility.canDonateTo(donorGroup, userBloodGroup)) {
+                    Model_Donor d = new Model_Donor(
+                            rs.getString("uid"),
+                            rs.getString("name"),
+                            donorGroup,
+                            rs.getString("city"),
+                            rs.getString("mobile")
+                    );
+                    list.add(d);
+                }
             }
             return list;
         }, new DatabaseHelper.DbCallback<java.util.ArrayList<Model_Donor>>() {
@@ -113,6 +120,8 @@ public class Fragment_searchDoner extends Fragment {
 
             @Override
             public void onFailure(Exception e) {
+                if (!isAdded()) return;
+                Toast.makeText(requireContext(), "Failed to read donors: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
 

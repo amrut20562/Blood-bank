@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ public class ActivityRequestBlood extends AppCompatActivity {
 
         Button send_request_btn = findViewById(R.id.send_request_btn);
         EditText quantity = findViewById(R.id.quantity);
+        CheckBox emergencyCheckbox = findViewById(R.id.emergency_checkbox);
 
 
         Spinner_blood_group.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -44,14 +46,15 @@ public class ActivityRequestBlood extends AppCompatActivity {
                 //code to send request
 
                 String str_quantity = quantity.getText().toString().trim();
-                if (str_quantity.isEmpty()){
-                    Toast.makeText(ActivityRequestBlood.this, "please fill all fields ", Toast.LENGTH_SHORT).show();
+                int parsedQuantity = ValidationUtils.parsePositiveQuantity(str_quantity);
+                if (parsedQuantity <= 0){
+                    Toast.makeText(ActivityRequestBlood.this, "Enter a valid quantity", Toast.LENGTH_SHORT).show();
                 }
                 else{
                     send_request_btn.setEnabled(false);
                     FireManager manager = new FireManager();
                     Toast.makeText(ActivityRequestBlood.this, "sending request....", Toast.LENGTH_SHORT).show();
-                    manager.sendBloodRequest(ActivityRequestBlood.this, bloodGroup, str_quantity, new FireManager.OperationCallback() {
+                    manager.sendBloodRequest(ActivityRequestBlood.this, bloodGroup, str_quantity, emergencyCheckbox.isChecked(), new FireManager.OperationCallback() {
                         @Override
                         public void onSuccess() {
                             finish();

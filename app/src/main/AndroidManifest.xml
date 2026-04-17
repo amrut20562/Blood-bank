@@ -19,6 +19,24 @@
             android:name=".RegisterDonorActivity"
             android:exported="false" />
         <activity
+            android:name=".MatchingDonorsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".UserRequestsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RequestManagementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DonationHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".InventoryManagementActivity"
+            android:exported="false" />
+        <activity
             android:name=".ActivityRequestBlood"
             android:exported="false" />
         <activity
